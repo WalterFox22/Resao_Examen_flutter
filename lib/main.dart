@@ -120,40 +120,74 @@ class _MainMenuState extends State<MainMenu> {
 
   @override
   Widget build(BuildContext context) {
-    // Si el rol es null, intenta recargarlo (por si cambió el usuario)
     if (rol == null) {
       cargarRol();
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
     }
     return Scaffold(
       appBar: AppBar(
         title: const Text('Turismo Ciudadano'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'Cerrar sesión',
-            onPressed: cerrarSesion,
-          ),
-        ],
+        backgroundColor: Colors.green[700],
+        elevation: 4,
       ),
-      body: ListView(
-        children: [
-          if (rol == 'publicador')
-            ListTile(
-              title: const Text('Blog Turístico'),
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BlogPage())),
-            ),
-          if (rol == 'visitante') ...[
-            ListTile(
-              title: const Text('Reseñas y Respuestas'),
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ChatTurismoPage())),
-            ),
-            ListTile(
-              title: const Text('Blog Turístico'),
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BlogPage(onlyView: true))),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFE8F5E9), Color(0xFFB2DFDB)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: ListView(
+          padding: const EdgeInsets.all(24),
+          children: [
+            if (rol == 'publicador')
+              Card(
+                elevation: 6,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                child: ListTile(
+                  leading: const Icon(Icons.article, color: Colors.green, size: 32),
+                  title: const Text('Blog Turístico', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 20),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BlogPage())),
+                ),
+              ),
+            if (rol == 'visitante') ...[
+              Card(
+                elevation: 6,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                child: ListTile(
+                  leading: const Icon(Icons.chat, color: Colors.teal, size: 32),
+                  title: const Text('Reseñas y Respuestas', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 20),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ChatTurismoPage())),
+                ),
+              ),
+              const SizedBox(height: 18),
+              Card(
+                elevation: 6,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                child: ListTile(
+                  leading: const Icon(Icons.article, color: Colors.green, size: 32),
+                  title: const Text('Blog Turístico', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 20),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BlogPage(onlyView: true))),
+                ),
+              ),
+            ],
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: cerrarSesion,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green[700],
+                foregroundColor: Colors.white, // <-- letras blancas
+              ),
+              child: const Text('Cerrar sesión'),
             ),
           ],
-        ],
+        ),
       ),
     );
   }

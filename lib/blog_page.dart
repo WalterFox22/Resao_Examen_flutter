@@ -182,6 +182,8 @@ class _BlogPageState extends State<BlogPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Blog Turístico'),
+        backgroundColor: Colors.green[700],
+        elevation: 4,
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -198,213 +200,250 @@ class _BlogPageState extends State<BlogPage> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          if (!widget.onlyView)
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Column(
-                children: [
-                  TextField(controller: tituloController, decoration: const InputDecoration(labelText: 'Título')),
-                  TextField(controller: descripcionController, decoration: const InputDecoration(labelText: 'Descripción')),
-                  TextField(controller: ubicacionController, decoration: const InputDecoration(labelText: 'URL de ubicación (Google Maps)')),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ElevatedButton.icon(
-                        onPressed: pickImagesFromGallery,
-                        icon: const Icon(Icons.photo_library),
-                        label: const Text('Galería'),
-                      ),
-                      ElevatedButton.icon(
-                        onPressed: takePhotoWithCamera,
-                        icon: const Icon(Icons.camera_alt),
-                        label: const Text('Cámara'),
-                      ),
-                      IconButton(
-                        onPressed: clearSelection,
-                        icon: const Icon(Icons.clear),
-                        tooltip: 'Limpiar selección',
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text('Seleccionadas: ${selectedImages.length}'),
-                  SizedBox(
-                    height: 80,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: selectedImages.map((img) => Padding(
-                        padding: const EdgeInsets.all(4),
-                        child: kIsWeb
-                            ? FutureBuilder<Uint8List>(
-                                future: img.readAsBytes(),
-                                builder: (context, snapshot) {
-                                  if (!snapshot.hasData) return const SizedBox(width: 60, height: 60);
-                                  return Image.memory(
-                                    snapshot.data!,
-                                    width: 60,
-                                    height: 60,
-                                    fit: BoxFit.cover,
-                                  );
-                                },
-                              )
-                            : Image.file(
-                                File(img.path),
-                                width: 60,
-                                height: 60,
-                                fit: BoxFit.cover,
-                              ),
-                      )).toList(),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  ElevatedButton(
-                    onPressed: uploadImages,
-                    child: const Text('Subir imágenes seleccionadas'),
-                  ),
-                  const SizedBox(height: 8),
-                  ElevatedButton(
-                    onPressed: publicar,
-                    child: const Text('Publicar'),
-                  ),
-                ],
-              ),
-            ),
-          const Divider(),
-          Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance.collection('blog').orderBy('fecha', descending: true).snapshots(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
-                final docs = snapshot.data!.docs;
-                return ListView.builder(
-                  itemCount: docs.length,
-                  itemBuilder: (context, i) {
-                    final data = docs[i].data() as Map<String, dynamic>;
-                    final blogId = docs[i].id;
-                    return Card(
-                      child: ListTile(
-                        title: Text(data['titulo'] ?? ''),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFE8F5E9), Color(0xFFB2DFDB)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Column(
+          children: [
+            if (!widget.onlyView)
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: Card(
+                  elevation: 6,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        TextField(controller: tituloController, decoration: const InputDecoration(labelText: 'Título')),
+                        TextField(controller: descripcionController, decoration: const InputDecoration(labelText: 'Descripción')),
+                        TextField(controller: ubicacionController, decoration: const InputDecoration(labelText: 'URL de ubicación (Google Maps)')),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            Text(data['descripcion'] ?? ''),
-                            if (data['ubicacion'] != null && data['ubicacion'].toString().isNotEmpty)
-                              InkWell(
-                                child: Text(
-                                  'Ver ubicación en Google Maps',
-                                  style: const TextStyle(
-                                    color: Colors.blue,
-                                    decoration: TextDecoration.underline,
-                                  ),
-                                ),
-                                onTap: () async {
-                                  final url = data['ubicacion'];
-                                  if (await canLaunchUrl(Uri.parse(url))) {
-                                    await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-                                  }
-                                },
+                            ElevatedButton.icon(
+                              onPressed: pickImagesFromGallery,
+                              icon: const Icon(Icons.photo_library, color: Colors.white),
+                              label: const Text('Galería'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.teal[400],
+                                foregroundColor: Colors.white, // <-- letras blancas
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                               ),
-                            Wrap(
-                              children: (data['fotos'] as List<dynamic>? ?? []).map<Widget>((fileName) {
-                                return Padding(
-                                  padding: const EdgeInsets.all(4),
-                                  child: FutureBuilder<String>(
-                                    future: supabase.storage.from('uploads').createSignedUrl(fileName, 60 * 60), // 1 hora
-                                    builder: (context, snapshot) {
-                                      if (!snapshot.hasData) {
-                                        return const SizedBox(width: 60, height: 60);
-                                      }
-                                      return Image.network(snapshot.data!, width: 60, height: 60, fit: BoxFit.cover);
-                                    },
-                                  ),
-                                );
-                              }).toList(),
                             ),
-                            // Mostrar reseñas
-                            StreamBuilder<QuerySnapshot>(
-                              stream: FirebaseFirestore.instance
-                                  .collection('blog')
-                                  .doc(blogId)
-                                  .collection('reseñas')
-                                  .orderBy('fecha', descending: true)
-                                  .snapshots(),
-                              builder: (context, snap) {
-                                if (!snap.hasData) return const SizedBox();
-                                final resenasList = snap.data!.docs;
-                                return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text('Reseñas:', style: TextStyle(fontWeight: FontWeight.bold)),
-                                    ...resenasList.map((r) {
-                                      final rdata = r.data() as Map<String, dynamic>;
-                                      return Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              Expanded(child: Text('${rdata['reseña']} (Calificación: ${rdata['calificacion']})')),
-                                              if (!widget.onlyView) ...[
-                                                IconButton(
-                                                  icon: const Icon(Icons.delete, color: Colors.red, size: 18),
-                                                  onPressed: () async {
-                                                    await r.reference.delete();
-                                                  },
-                                                ),
-                                                IconButton(
-                                                  icon: const Icon(Icons.reply, color: Colors.blue, size: 18),
-                                                  onPressed: () {
-                                                    showReplyDialog(r.reference);
-                                                  },
-                                                ),
-                                              ]
-                                            ],
-                                          ),
-                                          // Mostrar respuestas a la reseña
-                                          StreamBuilder<QuerySnapshot>(
-                                            stream: r.reference.collection('respuestas').orderBy('fecha').snapshots(),
-                                            builder: (context, respSnap) {
-                                              if (!respSnap.hasData) return const SizedBox();
-                                              final respuestas = respSnap.data!.docs;
-                                              return Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: respuestas.map((resp) {
-                                                  final respData = resp.data() as Map<String, dynamic>;
-                                                  return Padding(
-                                                    padding: const EdgeInsets.only(left: 24.0, top: 2, bottom: 2),
-                                                    child: Text('Respuesta: ${respData['respuesta']}'),
-                                                  );
-                                                }).toList(),
-                                              );
-                                            },
-                                          ),
-                                        ],
-                                      );
-                                    }),
-                                  ],
-                                );
-                              },
-                            ),
-                            if (widget.onlyView)
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: TextButton.icon(
-                                  icon: const Icon(Icons.rate_review),
-                                  label: const Text('Agregar reseña'),
-                                  onPressed: () => showReviewDialog(blogId),
-                                ),
+                            ElevatedButton.icon(
+                              onPressed: takePhotoWithCamera,
+                              icon: const Icon(Icons.camera_alt, color: Colors.white),
+                              label: const Text('Cámara'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green[700],
+                                foregroundColor: Colors.white, // <-- letras blancas
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                               ),
+                            ),
+                            IconButton(
+                              onPressed: clearSelection,
+                              icon: const Icon(Icons.clear),
+                              tooltip: 'Limpiar selección',
+                            ),
                           ],
                         ),
-                      ),
-                    );
-                  },
-                );
-              },
+                        const SizedBox(height: 8),
+                        Text('Seleccionadas: ${selectedImages.length}'),
+                        SizedBox(
+                          height: 80,
+                          child: ListView(
+                            scrollDirection: Axis.horizontal,
+                            children: selectedImages.map((img) => Padding(
+                              padding: const EdgeInsets.all(4),
+                              child: kIsWeb
+                                  ? FutureBuilder<Uint8List>(
+                                      future: img.readAsBytes(),
+                                      builder: (context, snapshot) {
+                                        if (!snapshot.hasData) return const SizedBox(width: 60, height: 60);
+                                        return Image.memory(
+                                          snapshot.data!,
+                                          width: 60,
+                                          height: 60,
+                                          fit: BoxFit.cover,
+                                        );
+                                      },
+                                    )
+                                  : Image.file(
+                                      File(img.path),
+                                      width: 60,
+                                      height: 60,
+                                      fit: BoxFit.cover,
+                                    ),
+                            )).toList(),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        ElevatedButton(
+                          onPressed: uploadImages,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green[700],
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          child: const Text('Subir imágenes seleccionadas'),
+                        ),
+                        const SizedBox(height: 8),
+                        ElevatedButton(
+                          onPressed: publicar,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.teal[400],
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          child: const Text('Publicar'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            const Divider(),
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance.collection('blog').orderBy('fecha', descending: true).snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+                  final docs = snapshot.data!.docs;
+                  return ListView.builder(
+                    itemCount: docs.length,
+                    itemBuilder: (context, i) {
+                      final data = docs[i].data() as Map<String, dynamic>;
+                      final blogId = docs[i].id;
+                      return Card(
+                        elevation: 4,
+                        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        child: ListTile(
+                          title: Text(data['titulo'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold)),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(data['descripcion'] ?? ''),
+                              if (data['ubicacion'] != null && data['ubicacion'].toString().isNotEmpty)
+                                InkWell(
+                                  child: Text(
+                                    'Ver ubicación en Google Maps',
+                                    style: const TextStyle(
+                                      color: Colors.blue,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                  ),
+                                  onTap: () async {
+                                    final url = data['ubicacion'];
+                                    if (await canLaunchUrl(Uri.parse(url))) {
+                                      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+                                    }
+                                  },
+                                ),
+                              Wrap(
+                                children: (data['fotos'] as List<dynamic>? ?? []).map<Widget>((fileName) {
+                                  return Padding(
+                                    padding: const EdgeInsets.all(4),
+                                    child: FutureBuilder<String>(
+                                      future: supabase.storage.from('uploads').createSignedUrl(fileName, 60 * 60), // 1 hora
+                                      builder: (context, snapshot) {
+                                        if (!snapshot.hasData) {
+                                          return const SizedBox(width: 60, height: 60);
+                                        }
+                                        return Image.network(snapshot.data!, width: 60, height: 60, fit: BoxFit.cover);
+                                      },
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                              // Mostrar reseñas
+                              StreamBuilder<QuerySnapshot>(
+                                stream: FirebaseFirestore.instance
+                                    .collection('blog')
+                                    .doc(blogId)
+                                    .collection('reseñas')
+                                    .orderBy('fecha', descending: true)
+                                    .snapshots(),
+                                builder: (context, snap) {
+                                  if (!snap.hasData) return const SizedBox();
+                                  final resenasList = snap.data!.docs;
+                                  return Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Text('Reseñas:', style: TextStyle(fontWeight: FontWeight.bold)),
+                                      ...resenasList.map((r) {
+                                        final rdata = r.data() as Map<String, dynamic>;
+                                        return Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Expanded(child: Text('${rdata['reseña']} (Calificación: ${rdata['calificacion']})')),
+                                                if (!widget.onlyView) ...[
+                                                  IconButton(
+                                                    icon: const Icon(Icons.delete, color: Colors.red, size: 18),
+                                                    onPressed: () async {
+                                                      await r.reference.delete();
+                                                    },
+                                                  ),
+                                                  IconButton(
+                                                    icon: const Icon(Icons.reply, color: Colors.blue, size: 18),
+                                                    onPressed: () {
+                                                      showReplyDialog(r.reference);
+                                                    },
+                                                  ),
+                                                ]
+                                              ],
+                                            ),
+                                            // Mostrar respuestas a la reseña
+                                            StreamBuilder<QuerySnapshot>(
+                                              stream: r.reference.collection('respuestas').orderBy('fecha').snapshots(),
+                                              builder: (context, respSnap) {
+                                                if (!respSnap.hasData) return const SizedBox();
+                                                final respuestas = respSnap.data!.docs;
+                                                return Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: respuestas.map((resp) {
+                                                    final respData = resp.data() as Map<String, dynamic>;
+                                                    return Padding(
+                                                      padding: const EdgeInsets.only(left: 24.0, top: 2, bottom: 2),
+                                                      child: Text('Respuesta: ${respData['respuesta']}'),
+                                                    );
+                                                  }).toList(),
+                                                );
+                                              },
+                                            ),
+                                          ],
+                                        );
+                                      }),
+                                    ],
+                                  );
+                                },
+                              ),
+                              if (widget.onlyView)
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: TextButton.icon(
+                                    icon: const Icon(Icons.rate_review),
+                                    label: const Text('Agregar reseña'),
+                                    onPressed: () => showReviewDialog(blogId),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

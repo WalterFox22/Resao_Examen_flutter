@@ -76,68 +76,92 @@ class _UploadPageState extends State<UploadPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Subir Imágenes')),
+      appBar: AppBar(
+        title: const Text('Subir Imágenes'),
+        backgroundColor: Colors.green[700],
+        elevation: 4,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        child: Card(
+          elevation: 6,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
               children: [
-                ElevatedButton.icon(
-                  onPressed: pickImagesFromGallery,
-                  icon: const Icon(Icons.photo_library),
-                  label: const Text('Galería'),
-                ),
-                ElevatedButton.icon(
-                  onPressed: takePhotoWithCamera,
-                  icon: const Icon(Icons.camera_alt),
-                  label: const Text('Cámara'),
-                ),
-                IconButton(
-                  onPressed: clearSelection,
-                  icon: const Icon(Icons.clear),
-                  tooltip: 'Limpiar selección',
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text('Seleccionadas: ${selectedImages.length}'),
-            const SizedBox(height: 8),
-            SizedBox(
-              height: 100,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: selectedImages
-                    .map((img) => Padding(
-                          padding: const EdgeInsets.all(4),
-                          child: Image.file(
-                            // ignore: deprecated_member_use
-                            File(img.path),
-                            width: 80,
-                            height: 80,
-                            fit: BoxFit.cover,
-                          ),
-                        ))
-                    .toList(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: uploadImages,
-              child: const Text('Subir imágenes seleccionadas'),
-            ),
-            const SizedBox(height: 16),
-            if (uploadedUrls.isNotEmpty)
-              Expanded(
-                child: ListView(
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    const Text('URLs de imágenes subidas (copia y pega en el blog):'),
-                    ...uploadedUrls.map((url) => SelectableText(url)),
+                    ElevatedButton.icon(
+                      onPressed: pickImagesFromGallery,
+                      icon: const Icon(Icons.photo_library, color: Colors.white),
+                      label: const Text('Galería'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal[400],
+                        foregroundColor: Colors.white, // <-- letras blancas
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: takePhotoWithCamera,
+                      icon: const Icon(Icons.camera_alt, color: Colors.white),
+                      label: const Text('Cámara'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green[700],
+                        foregroundColor: Colors.white, // <-- letras blancas
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: clearSelection,
+                      icon: const Icon(Icons.clear),
+                      tooltip: 'Limpiar selección',
+                    ),
                   ],
                 ),
-              ),
-          ],
+                const SizedBox(height: 12),
+                Text('Seleccionadas: ${selectedImages.length}'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  height: 100,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    children: selectedImages
+                        .map((img) => Padding(
+                              padding: const EdgeInsets.all(4),
+                              child: Image.file(
+                                File(img.path),
+                                width: 80,
+                                height: 80,
+                                fit: BoxFit.cover,
+                              ),
+                            ))
+                        .toList(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: uploadImages,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green[700],
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: const Text('Subir imágenes seleccionadas'),
+                ),
+                const SizedBox(height: 16),
+                if (uploadedUrls.isNotEmpty)
+                  Expanded(
+                    child: ListView(
+                      children: [
+                        const Text('URLs de imágenes subidas (copia y pega en el blog):'),
+                        ...uploadedUrls.map((url) => SelectableText(url)),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ),
       ),
     );
