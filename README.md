@@ -50,7 +50,16 @@ _Agrega aquí tus imágenes de la app:_
 ![image](https://github.com/user-attachments/assets/9a9a6efa-3ab8-4bd7-b7a7-3f1ee6a1c640)
 
 
+**Evidencia de la base de supabase**
 
+![image](https://github.com/user-attachments/assets/937367df-3dec-454c-b934-c1b50d57ab07)
+
+
+**Evidencia de la base de Firebase**
+
+![image](https://github.com/user-attachments/assets/b572b36a-ff75-4a41-a061-a172c7970a2d)
+
+![image](https://github.com/user-attachments/assets/a4d8184b-ca23-405d-a558-7083db6eb420)
 
 ---
 
