@@ -2,6 +2,15 @@
 
 Aplicación móvil Flutter para compartir experiencias turísticas, reseñas y fotos de lugares de interés en Ecuador.
 
+
+
+## Autores
+
+- **Walter Cobacango** 
+- **Adrian Cadena**
+
+
+
 ## ¿Qué hace esta app?
 
 - Permite a los usuarios registrarse y elegir su rol: **Visitante** o **Publicador**.
@@ -41,12 +50,7 @@ _Agrega aquí tus imágenes de la app:_
 ![image](https://github.com/user-attachments/assets/9a9a6efa-3ab8-4bd7-b7a7-3f1ee6a1c640)
 
 
----
 
-## Autores
-
-- **Walter Cobacango** (autor principal)
-- **Adrian Cadena** (colaborador)
 
 ---
 
